@@ -63,16 +63,22 @@ function addNewBookToLibrary(title, author, pages, read) {
 
 function removeBookFromLibrary(index) {
     myLibrary = myLibrary.filter(book => book.getIndex() == index);
+    updateLibrary();
 }
 
 function viewCurrentLibrary() {
-    const row = document.querySelector('.row');
-    /* while(row.firstChild) {
-        row.removeChild(row.firstChild);
-    } */
     myLibrary.forEach(book => {
         addBookToPage(book);
     });
+   
+}
+
+function updateLibrary() {
+    const row = document.querySelector('.row');
+    while(row.firstElementChild.dataset.index != row.lastElementChild.dataset.index) {
+        row.removeChild(row.lastChild);
+    }
+    viewCurrentLibrary();
    
 }
 
@@ -117,11 +123,22 @@ function addBookToPage(book) {
 
     checkbox.setAttribute("type", "checkbox");
     checkbox.checked = book.getRead();
+    checkbox.addEventListener('click', e=> {
+        book.toggleReadStatus();
+        e.target.checked = book.getRead();
+        
+    });
+    bookDiv.setAttribute('data-index', `${book.getIndex()}`);
     checkboxLabel.textContent = "You " + book.returnTextIfRead();
 
     bookInfo.textContent = "Written by: " + book.getAuthor();
     // buttonAdd.textContent = "Add";
     buttonRemove.textContent = "Del";
+    buttonRemove.setAttribute('data-index', `${book.getIndex()}`);
+    buttonRemove.addEventListener('click', e => {
+        removeBookFromLibrary(parseInt(e.target.dataset.index));
+
+    })
     smallText.textContent = "Pages: " + book.getPages();
 
     formCheck.append(checkbox, checkboxLabel);
