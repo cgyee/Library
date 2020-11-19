@@ -8,42 +8,46 @@ function Book(title, author, pages, read) {
     this.index = 0;
     
     this.info = function() {
-        return title + " is by " + author + " it is " + pages + " and you  " + this.returnTextIfRead();
+        return this.title + " is by " + this.author + " it is " + this.pages + " and you  " + this.returnTextIfRead();
     };
+
+    this.getTitle = function() {
+        return this.title;
+    }
     
     this.setIndex = function(number) {
-        index = number;
+        this.index = number;
     };
     
     this.getIndex = function() {
-        return index;
+        return this.index;
     };
 
     this.getRead = function() {
-        return read;
+        return this.read;
     }
     
     this.toggleReadStatus = function() {
-        read = !read;
-        return read;
+        this.read = !this.read;
+        return this.read;
 
     };
     
     this.getPages = function() {
-        return pages;
+        return this.pages;
     };
     
     this.returnTextIfRead = function() {
-        if(read) {
+        if(this.read) {
             return "have read it!";
         }
         else {
-            return "have not read!";
+            return "have not read it!";
         }
     };
 
     this.getAuthor = function() {
-        return author;
+        return this.author;
     };
 }
 
@@ -56,13 +60,20 @@ function addBookToLibrary(book) {
     myLibrary.push(book);
 }
 
+function updateIndex() {
+    for(i = 0; i < myLibrary.length; i++) {
+        myLibrary[i].setIndex = i;
+    }
+}
+
 function addNewBookToLibrary(title, author, pages, read) {
-    const newBook = Book(title, author, pages, read);
-    addBookToLibrary(newBook);
+    addBookToLibrary(new Book(title, author, pages, read));
+    updateLibrary();
 }
 
 function removeBookFromLibrary(index) {
-    myLibrary = myLibrary.filter(book => book.getIndex() == index);
+    myLibrary = myLibrary.filter(book => book.getIndex() != index);
+    updateIndex();
     updateLibrary();
 }
 
@@ -75,7 +86,7 @@ function viewCurrentLibrary() {
 
 function updateLibrary() {
     const row = document.querySelector('.row');
-    while(row.firstElementChild.dataset.index != row.lastElementChild.dataset.index) {
+    while(row.firstElementChild!= row.lastElementChild) {
         row.removeChild(row.lastChild);
     }
     viewCurrentLibrary();
@@ -87,7 +98,7 @@ function addBookToPage(book) {
     bookDiv = document.createElement('div');
     cardDiv = document.createElement('div');
     svgDiv = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    textSvg = document.createElement('text');
+    textSvg = document.createElementNS('http://www.w3.org/2000/svg','text');
     rectSvg = document.createElementNS('http://www.w3.org/2000/svg','rect');
     cardBodyDiv = document.createElement('div');
     bookInfo = document.createElement('p');
@@ -120,12 +131,19 @@ function addBookToPage(book) {
     rectSvg.setAttribute("width", "100%");
     rectSvg.setAttribute("height", "100%");
     rectSvg.setAttribute("fill", "#55595c");
+    textSvg.setAttribute("x", "30%");
+    textSvg.setAttribute("y", "50%");
+    textSvg.setAttribute("fill", "#eceeef");
+    textSvg.setAttribute("dy", ".3em");
+
+    textSvg.textContent = book.getTitle();
 
     checkbox.setAttribute("type", "checkbox");
     checkbox.checked = book.getRead();
     checkbox.addEventListener('click', e=> {
         book.toggleReadStatus();
         e.target.checked = book.getRead();
+        checkboxLabel.textContent = "You " + book.returnTextIfRead();
         
     });
     bookDiv.setAttribute('data-index', `${book.getIndex()}`);
@@ -145,17 +163,25 @@ function addBookToPage(book) {
     buttonGroup.append(buttonRemove);
     buttonsFlex.append(buttonGroup, formCheck, smallText);
     cardBodyDiv.append(bookInfo, buttonsFlex);
-    rectSvg.append(textSvg);
-    svgDiv.append(rectSvg);
+    svgDiv.append(rectSvg, textSvg);
     cardDiv.append(svgDiv, cardBodyDiv);
     bookDiv.append(cardDiv);
     row.append(bookDiv);
 }
 
-function toggleReadTextButton() {
-
-}
-
+const addBook = document.querySelector('#add');
+addBook.addEventListener('click', e=> {
+    const title = document.querySelector('#title').value;
+    const author = document.querySelector('#author').value;
+    const pages = document.querySelector('#pages').value;
+    if(title && author && pages){
+        addNewBookToLibrary(title, author, pages, true);
+    }
+    else {
+        alert("Please fill out the entry boxes before adding");
+    }
+    console.log(myLibrary);
+});
 const testBook = new Book("Lord of the Things", "Some Guy", "many", true);
 addBookToLibrary(testBook);
 viewCurrentLibrary();
